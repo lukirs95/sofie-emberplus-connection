@@ -209,7 +209,13 @@ export class EmberClient extends EventEmitter<EmberClientEvents> {
 				cb,
 			})
 
-		return this._sendCommand<RootElement>(node, command, ExpectResponse.HasChildren)
+		return this._sendCommand<RootElement>(
+			node,
+			command,
+			node.contents.type == 'PARAMETER'
+				? ExpectResponse.None
+				: ExpectResponse.HasChildren
+		)
 	}
 	async subscribe(
 		node: RootElement | Array<RootElement>,
@@ -388,15 +394,14 @@ export class EmberClient extends EventEmitter<EmberClientEvents> {
 			const i = pathArr.shift()
 			if (!i) break // TODO - this will break the loop if the path was `1..0`
 			if (!tree) break
-			let next = getNextChild(tree, i)
-			if (!next) {
-				const req = await this.getDirectory(tree)
-				tree = (await req.response) as NumberedTreeNode<EmberElement>
-				next = getNextChild(tree, i)
-			}
-			tree = next
+			const req = await this.getDirectory(tree)
+			tree = (await req.response) as NumberedTreeNode<EmberElement>
+			tree = getNextChild(tree, i)
 			if (!tree) throw new Error(`Could not find node ${i} on given path ${numberedPath.join()}`)
 			if (tree?.number !== undefined) numberedPath.push(tree.number)
+		}
+		if (tree) {
+			const req = await this.getDirectory(tree)
 		}
 
 		if (cb && numberedPath) {
@@ -506,7 +511,7 @@ export class EmberClient extends EventEmitter<EmberClientEvents> {
 			for (const req of reqs) {
 				// Don't complete the response, if the call was expecting the children to be loaded
 				if (req.nodeResponse === ExpectResponse.HasChildren && !change.node.children) continue
-
+				
 				if (req.cb) req.cb(change.node)
 				if (req.resolve) {
 					req.resolve(change.node)

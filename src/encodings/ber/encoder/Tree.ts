@@ -130,7 +130,6 @@ function hasChildren(el: TreeElement<EmberElement>): boolean {
 		el.children !== undefined &&
 		!(
 			el.contents.type === ElementType.Command ||
-			el.contents.type === ElementType.Parameter ||
 			el.contents.type === ElementType.Template
 		)
 	)
