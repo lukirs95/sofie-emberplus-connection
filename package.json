@@ -11,6 +11,7 @@
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
 	"scripts": {
+		"prepare": "tsc",
 		"build": "tsc",
 		"test": "jest test",
 		"test:coverage": "run test -- --coverage",
