@@ -404,12 +404,13 @@ export class EmberClient extends EventEmitter<EmberClientEvents> {
 			const req = await this.getDirectory(tree)
 		}
 
-		if (cb && numberedPath) {
-			this._subscriptions.push({
-				path: numberedPath.join('.'),
-				cb,
-			})
-		}
+		// this resulted in doubled subscription because getDirectory() adds the element as well
+		// if (cb && numberedPath) {
+		// 	this._subscriptions.push({
+		// 		path: numberedPath.join('.'),
+		// 		cb,
+		// 	})
+		// }
 
 		return tree
 	}
@@ -511,7 +512,7 @@ export class EmberClient extends EventEmitter<EmberClientEvents> {
 			for (const req of reqs) {
 				// Don't complete the response, if the call was expecting the children to be loaded
 				if (req.nodeResponse === ExpectResponse.HasChildren && !change.node.children) continue
-				
+
 				if (req.cb) req.cb(change.node)
 				if (req.resolve) {
 					req.resolve(change.node)
